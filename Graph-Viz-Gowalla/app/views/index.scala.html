@@ -1,0 +1,175 @@
+  <!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body{ text-align:center }
+    .div{ margin:0 auto; width:400px; height:20px; }
+  </style>
+   <script src="https://d3js.org/d3.v5.js"></script>
+
+
+</head>
+
+  <body>
+    <br><br>
+    <p id="content">Gowalla Dataset</p>
+    <br><br>
+    <div>
+      <input type="text" class = "div" style="width: 45%" id="numberOfUsers" placeholder="Search number of nodes, range from 1-10000, e.g.500. The default value is 5.">
+      <button onclick="drawGraph()">submit</button>
+    </div>
+      <script>
+var scale = 3.5;
+var userJson;
+var svgContainer = d3.select("body").append("svg")
+  .attr("width",540*scale)
+  .attr("height",270*scale);
+	var t0,t1,t2,t3,t4;
+
+
+function drawCircles(usersJson)
+{
+      userJson = usersJson;
+      len = usersJson.length;
+      for (i in userJson) {
+        cxFront = parseFloat(userJson[i].longitude) + 180.0;
+        cyFront = parseFloat(userJson[i].latitude) + 90.0;
+        cxFront = cxFront*scale;
+        cyFront = (270.0 - cyFront - 90.0) * scale;
+        var circleFront = svgContainer.append("circle")
+          .attr("cx", cxFront)
+          .attr("cy", cyFront)
+          .attr("r", 3)
+          .attr("fill", "blue");
+  }
+}
+
+function drawEdges(friendshipJson)
+{
+      for (i in friendshipJson) {
+        var friendship = friendshipJson[i];
+        var front = friendship[0];
+        var end = friendship[1];
+        if (front > len-1) {continue;}
+        if (end > len-1) {continue;}
+
+        cxFront = parseFloat(userJson[front].longitude) + 180.0;
+        cyFront = parseFloat(userJson[front].latitude) + 90.0;
+        cxFront = cxFront * scale;
+        cyFront = (270.0 - cyFront - 90.0) * scale;
+
+        var cxEnd = parseFloat(userJson[end].longitude) + 180.0;
+        var cyEnd = parseFloat(userJson[end].latitude) + 90.0;
+        cxEnd = cxEnd * scale;
+        cyEnd = (270.0 - cyEnd - 90.0) * scale;
+
+        var line = svgContainer.append("line")
+          .attr("x1", cxFront)
+          .attr("y1", cyFront)
+          .attr("x2", cxEnd)
+          .attr("y2", cyEnd)
+          .attr("stroke", "black")
+          .attr("stroke-width", 1);
+  }
+}
+
+function drawGraph(){
+  var userNum = document.getElementById("numberOfUsers").value;
+  if (userNum == '') {userNum = 5;}
+  var cxFront = 0;
+  var cyFront = 0;
+  svgContainer.selectAll("*").remove();
+  var len = 0;
+	
+	 t0 = performance.now();
+	 
+	 var request = new XMLHttpRequest();
+request.open('GET', 'http://localhost:9000/users?num='+userNum, false);  // `false` makes the request synchronous
+request.send(null);
+
+if (request.status === 200) {
+	
+         t1 = performance.now();
+    console.log("requesting vertices "+(t1 - t0));
+  drawCircles(JSON.parse(request.responseText));
+           t2 = performance.now();
+    console.log("drawing vertices "+(t2 - t1));
+}
+	 
+	request = new XMLHttpRequest();
+request.open('GET', 'http://localhost:9000/friendships?num='+userNum, false);  // `false` makes the request synchronous
+request.send(null);
+
+if (request.status === 200) {
+	
+         t3 = performance.now();
+    console.log("requesting edges "+(t3 - t2));
+  drawEdges(JSON.parse(request.responseText));
+           t4 = performance.now();
+    console.log("drawing edges "+(t4 - t3));}
+ /* fetch('http://localhost:9000/users?num=' + userNum)
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(usersJson) {
+         t1 = performance.now();
+    console.log("querying users "+(t1 - t0));
+      userJson = usersJson;
+      len = usersJson.length;
+      for (i in userJson) {
+        cxFront = parseFloat(userJson[i].longitude) + 180.0;
+        cyFront = parseFloat(userJson[i].latitide) + 90.0;
+        cxFront = cxFront*scale;
+        cyFront = (270.0 - cyFront - 90.0) * scale;
+        var circleFront = svgContainer.append("circle")
+          .attr("cx", cxFront)
+          .attr("cy", cyFront)
+          .attr("r", 3)
+          .attr("fill", "blue");
+  }
+   t2 = performance.now();
+  console.log("drawing dots "+(t2 - t1));});
+*/
+ /* fetch('http://localhost:9000/friendships?num=' + userNum)
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(friendshipJson) {
+             t3 = performance.now();
+    console.log("querying friendships "+(t3 - t2));
+      for (i in friendshipJson) {
+        var friendship = friendshipJson[i];
+        var front = friendship[0];
+        var end = friendship[1];
+        if (front > len-1) {continue;}
+        if (end > len-1) {continue;}
+
+        cxFront = parseFloat(userJson[front].longitude) + 180.0;
+        cyFront = parseFloat(userJson[front].latitide) + 90.0;
+        cxFront = cxFront * scale;
+        cyFront = (270.0 - cyFront - 90.0) * scale;
+
+        var cxEnd = parseFloat(userJson[end].longitude) + 180.0;
+        var cyEnd = parseFloat(userJson[end].latitide) + 90.0;
+        cxEnd = cxEnd * scale;
+        cyEnd = (270.0 - cyEnd - 90.0) * scale;
+
+        var line = svgContainer.append("line")
+          .attr("x1", cxFront)
+          .attr("y1", cyFront)
+          .attr("x2", cxEnd)
+          .attr("y2", cyEnd)
+          .attr("stroke", "black")
+          .attr("stroke-width", 1);
+  }
+           t4 = performance.now();
+    console.log("drawing edges "+(t4 - t3));
+  });
+  */
+}
+
+
+  </script>
+  </body>
+</html>
