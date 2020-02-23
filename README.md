@@ -1,6 +1,7 @@
 # Gowalla Graph Data Visualization
 
 Please download Graph-Viz-Gowalla
+
 The project is using the [Play! Framework](https://www.playframework.com/) 
 
 ## Build
