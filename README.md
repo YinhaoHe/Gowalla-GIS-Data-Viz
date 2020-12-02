@@ -1,4 +1,4 @@
-# Gowalla Graph Data Visualization
+# Gowalla Graph Data Visualization 
 
 Please download Graph-Viz-Gowalla
 
